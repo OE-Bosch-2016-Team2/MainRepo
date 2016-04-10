@@ -6,8 +6,8 @@ package acc;
  */
 public class ACC implements IACC {
 
-    private final int minFollowingDistance = 20; //in meters
-    private final int maxSpeed = 180; //in km/h
+    private int minFollowingTime; //in secs
+    private final int maxSpeed = 200; //in km/h
 
     private int pedal;
 
@@ -18,25 +18,29 @@ public class ACC implements IACC {
 
     public ACC() {
         pedal = 0;
+        minFollowingTime = 2;
     }
 
     @Override
-    public void PedalState(int wheelStateInDegrees, boolean ACCState, int currentSpeed, int nearestObstacleDistance) {
-        if (ACCState) {//ACC is on
-            if ((currentSpeed < maxSpeed - Math.abs(wheelStateInDegrees * 2)) && (nearestObstacleDistance > minFollowingDistance)) {//Should we accelerate?
-                //throttling
-                pedal = 1;
-                System.out.println("1");
-            } else if ((nearestObstacleDistance <= minFollowingDistance) || (currentSpeed > maxSpeed - Math.abs(wheelStateInDegrees * 2))) {//Should we brake?
-                //breaking
-                pedal = -1;
-                System.out.println("-1");
+    public void PedalState(int wheelStateInDegrees, int currentSpeed, int targetSpeed, int nearestObstacleDistance) {
+        if (targetSpeed != 0) {//ACC is on
+            double safeDistance = currentSpeed / 3.6 * minFollowingTime;//km/h to m/s * s = m
+            if (targetSpeed < currentSpeed) {
+                pedal = -1;//breaking
+            } else if (currentSpeed < maxSpeed - Math.abs(wheelStateInDegrees * 4)) {//Should we accelerate?
+                if (safeDistance > nearestObstacleDistance) {//break
+                    pedal = -1;
+                } else if (targetSpeed == currentSpeed) {//fine
+                    pedal = 0;
+                } else {//throttle
+                    pedal = 1;
+                }
+            } else if (currentSpeed == maxSpeed - Math.abs(wheelStateInDegrees * 4)) {
+                pedal = 0;//fine
             } else {
-                //do nothing
-                pedal = 0;
-                System.out.println("0");
+                pedal = -1;//break
             }
-        }else{
+        } else {
             //do nothing
             pedal = 0;
             System.out.println("0");

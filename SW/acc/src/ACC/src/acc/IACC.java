@@ -11,5 +11,5 @@ package acc;
  */
 public interface IACC {
     int getPedal();
-    void PedalState(int wheelStateInDegrees, boolean ACCState, int currentSpeed, int nearestObstacleDistance);
+    void PedalState(int wheelStateInDegrees, int currentSpeed, int targetSpeed, int nearestObstacleDistance);
 }
